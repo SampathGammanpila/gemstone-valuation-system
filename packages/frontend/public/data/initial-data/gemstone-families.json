@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name": "Diamond",
+    "category": "Native Element",
+    "mineralGroup": "Carbon",
+    "chemicalFormula": "C",
+    "hardnessMin": 10.0,
+    "hardnessMax": 10.0,
+    "rarityLevel": "Rare",
+    "valueCategory": "Precious",
+    "description": "The hardest known natural material and highly valued for its brilliance and fire."
+  },
+  {
+    "id": 2,
+    "name": "Ruby",
+    "category": "Oxide Mineral",
+    "mineralGroup": "Corundum",
+    "chemicalFormula": "Al₂O₃",
+    "hardnessMin": 9.0,
+    "hardnessMax": 9.0,
+    "rarityLevel": "Rare",
+    "valueCategory": "Precious",
+    "description": "Red variety of corundum, highly valued for its vibrant color and durability."
+  },
+  {
+    "id": 3,
+    "name": "Sapphire",
+    "category": "Oxide Mineral",
+    "mineralGroup": "Corundum",
+    "chemicalFormula": "Al₂O₃",
+    "hardnessMin": 9.0,
+    "hardnessMax": 9.0,
+    "rarityLevel": "Rare",
+    "valueCategory": "Precious",
+    "description": "Comes in various colors, with blue being the most popular. Any corundum that isn't red."
+  },
+  {
+    "id": 4,
+    "name": "Emerald",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Beryl",
+    "chemicalFormula": "Be₃Al₂(SiO₃)₆",
+    "hardnessMin": 7.5,
+    "hardnessMax": 8.0,
+    "rarityLevel": "Rare",
+    "valueCategory": "Precious",
+    "description": "Green variety of beryl, valued for its rich color and historical significance."
+  },
+  {
+    "id": 5,
+    "name": "Amethyst",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Quartz",
+    "chemicalFormula": "SiO₂",
+    "hardnessMin": 7.0,
+    "hardnessMax": 7.0,
+    "rarityLevel": "Common",
+    "valueCategory": "Semi-Precious",
+    "description": "Purple variety of quartz, historically considered precious but now more common."
+  },
+  {
+    "id": 6,
+    "name": "Aquamarine",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Beryl",
+    "chemicalFormula": "Be₃Al₂(SiO₃)₆",
+    "hardnessMin": 7.5,
+    "hardnessMax": 8.0,
+    "rarityLevel": "Moderate",
+    "valueCategory": "Semi-Precious",
+    "description": "Blue to blue-green variety of beryl, named for its seawater-like color."
+  },
+  {
+    "id": 7,
+    "name": "Opal",
+    "category": "Mineraloid",
+    "mineralGroup": "Silica",
+    "chemicalFormula": "SiO₂·nH₂O",
+    "hardnessMin": 5.5,
+    "hardnessMax": 6.5,
+    "rarityLevel": "Moderate",
+    "valueCategory": "Precious",
+    "description": "Known for its play of colors and unique patterns; contains water in its composition."
+  },
+  {
+    "id": 8,
+    "name": "Topaz",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Nesosilicate",
+    "chemicalFormula": "Al₂SiO₄(F,OH)₂",
+    "hardnessMin": 8.0,
+    "hardnessMax": 8.0,
+    "rarityLevel": "Moderate",
+    "valueCategory": "Semi-Precious",
+    "description": "Comes in various colors, with blue and imperial topaz being the most valuable."
+  },
+  {
+    "id": 9,
+    "name": "Garnet",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Garnet Group",
+    "chemicalFormula": "X₃Y₂(SiO₄)₃",
+    "hardnessMin": 6.5,
+    "hardnessMax": 7.5,
+    "rarityLevel": "Common",
+    "valueCategory": "Semi-Precious",
+    "description": "Group of minerals with similar crystal structure but varying composition and colors."
+  },
+  {
+    "id": 10,
+    "name": "Tanzanite",
+    "category": "Silicate Mineral",
+    "mineralGroup": "Zoisite",
+    "chemicalFormula": "Ca₂Al₃(SiO₄)₃(OH)",
+    "hardnessMin": 6.0,
+    "hardnessMax": 7.0,
+    "rarityLevel": "Very Rare",
+    "valueCategory": "Precious",
+    "description": "Blue-violet variety of zoisite, discovered in 1967 and found only in Tanzania."
+  }
+]

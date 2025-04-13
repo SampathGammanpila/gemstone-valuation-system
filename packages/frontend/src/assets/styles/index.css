@@ -1,0 +1,10 @@
+@import './tailwind.css';
+
+/* Additional global styles */
+body {
+  @apply bg-gray-50 text-gray-800;
+}
+
+#root {
+  @apply min-h-screen;
+}

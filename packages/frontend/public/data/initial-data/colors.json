@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "Pigeon Blood Red",
+    "category": "Red",
+    "hexCode": "#D42C5E",
+    "rgbValues": [212, 44, 94],
+    "munsellHue": "5R",
+    "munsellValue": 4.5,
+    "munsellChroma": 14.0
+  },
+  {
+    "id": 2,
+    "name": "Royal Blue",
+    "category": "Blue",
+    "hexCode": "#1A237E",
+    "rgbValues": [26, 35, 126],
+    "munsellHue": "7.5PB",
+    "munsellValue": 2.0,
+    "munsellChroma": 10.0
+  },
+  {
+    "id": 3,
+    "name": "Emerald Green",
+    "category": "Green",
+    "hexCode": "#046307",
+    "rgbValues": [4, 99, 7],
+    "munsellHue": "2.5G",
+    "munsellValue": 3.5,
+    "munsellChroma": 8.0
+  },
+  {
+    "id": 4,
+    "name": "Canary Yellow",
+    "category": "Yellow",
+    "hexCode": "#FFEF00",
+    "rgbValues": [255, 239, 0],
+    "munsellHue": "7.5Y",
+    "munsellValue": 8.5,
+    "munsellChroma": 12.0
+  },
+  {
+    "id": 5,
+    "name": "Padparadscha",
+    "category": "Orange-Pink",
+    "hexCode": "#FFA07A",
+    "rgbValues": [255, 160, 122],
+    "munsellHue": "2.5YR",
+    "munsellValue": 6.5,
+    "munsellChroma": 9.0
+  },
+  {
+    "id": 6,
+    "name": "Tanzanite Blue-Violet",
+    "category": "Purple",
+    "hexCode": "#4A4CFF",
+    "rgbValues": [74, 76, 255],
+    "munsellHue": "10PB",
+    "munsellValue": 3.7,
+    "munsellChroma": 12.0
+  },
+  {
+    "id": 7,
+    "name": "Jet Black",
+    "category": "Black",
+    "hexCode": "#111111",
+    "rgbValues": [17, 17, 17],
+    "munsellHue": "N",
+    "munsellValue": 0.5,
+    "munsellChroma": 0.0
+  },
+  {
+    "id": 8,
+    "name": "Colorless",
+    "category": "White/Colorless",
+    "hexCode": "#F7F7F7",
+    "rgbValues": [247, 247, 247],
+    "munsellHue": "N",
+    "munsellValue": 9.7,
+    "munsellChroma": 0.0
+  },
+  {
+    "id": 9,
+    "name": "Alexandrite Teal",
+    "category": "Multicolor",
+    "hexCode": "#367588",
+    "rgbValues": [54, 117, 136],
+    "munsellHue": "5BG",
+    "munsellValue": 4.5,
+    "munsellChroma": 6.0
+  },
+  {
+    "id": 10,
+    "name": "Paraiba Neon Blue",
+    "category": "Blue",
+    "hexCode": "#38E6FB",
+    "rgbValues": [56, 230, 251],
+    "munsellHue": "5B",
+    "munsellValue": 8.0,
+    "munsellChroma": 10.0
+  }
+]

@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "name": "Round Brilliant",
+    "category": "Faceted",
+    "subCategory": "Classic",
+    "description": "The most popular cut with 57-58 facets, maximizing brilliance and fire."
+  },
+  {
+    "id": 2,
+    "name": "Princess",
+    "category": "Faceted",
+    "subCategory": "Mixed",
+    "description": "Square or rectangular shape with pointed corners, often with 76 facets."
+  },
+  {
+    "id": 3,
+    "name": "Emerald",
+    "category": "Faceted",
+    "subCategory": "Step",
+    "description": "Rectangular shape with cut corners, featuring parallel facets that create a hall-of-mirrors effect."
+  },
+  {
+    "id": 4,
+    "name": "Asscher",
+    "category": "Faceted",
+    "subCategory": "Step",
+    "description": "Octagonal shape with large step facets and cropped corners, similar to emerald cut but square."
+  },
+  {
+    "id": 5,
+    "name": "Cushion",
+    "category": "Faceted",
+    "subCategory": "Mixed",
+    "description": "Square or rectangular shape with rounded corners, combining brilliance and vintage appeal."
+  },
+  {
+    "id": 6,
+    "name": "Oval",
+    "category": "Faceted",
+    "subCategory": "Classic",
+    "description": "Elongated round brilliant cut, often creates the illusion of greater size."
+  },
+  {
+    "id": 7,
+    "name": "Marquise",
+    "category": "Faceted",
+    "subCategory": "Classic",
+    "description": "Elongated shape with pointed ends, maximizing apparent size and creating unique look."
+  },
+  {
+    "id": 8,
+    "name": "Pear",
+    "category": "Faceted",
+    "subCategory": "Classic",
+    "description": "Teardrop shape combining elements of round and marquise cuts."
+  },
+  {
+    "id": 9,
+    "name": "Heart",
+    "category": "Faceted",
+    "subCategory": "Classic",
+    "description": "Romantic symbol shape featuring a cleft at the top and pointed bottom."
+  },
+  {
+    "id": 10,
+    "name": "Radiant",
+    "category": "Faceted",
+    "subCategory": "Mixed",
+    "description": "Rectangular or square shape with cut corners and brilliant-style facets."
+  },
+  {
+    "id": 11,
+    "name": "Trillion",
+    "category": "Faceted",
+    "subCategory": "Fancy",
+    "description": "Triangular shape, often with rounded sides, creates a dramatic look."
+  },
+  {
+    "id": 12,
+    "name": "Baguette",
+    "category": "Faceted",
+    "subCategory": "Step",
+    "description": "Rectangular shape with step-cut facets, often used as side stones."
+  },
+  {
+    "id": 13,
+    "name": "Standard Cabochon",
+    "category": "Cabochon",
+    "subCategory": "Standard",
+    "description": "Smooth, domed top with flat bottom, ideal for displaying phenomenal effects."
+  },
+  {
+    "id": 14,
+    "name": "Double Cabochon",
+    "category": "Cabochon",
+    "subCategory": "Specialty",
+    "description": "Domed on both top and bottom, creating a lens-like appearance."
+  },
+  {
+    "id": 15,
+    "name": "Fantasy",
+    "category": "Fantasy",
+    "subCategory": "Artistic",
+    "description": "Unique, one-of-a-kind cut with artistic elements and non-standard facet arrangements."
+  }
+]
