@@ -1,9 +1,10 @@
 // packages/backend/src/server.ts
-import express, { Request, Response, NextFunction, RequestHandler, ErrorRequestHandler } from 'express';
+import express, { Request, Response, NextFunction, RequestHandler } from 'express';
 import path from 'path';
 import session from 'express-session';
 import connectFlash from 'connect-flash';
 import helmet from 'helmet';
+import ejsLayouts from 'express-ejs-layouts';
 import cors from './config/cors';
 import environment from './config/environment';
 import adminConfig from './config/admin.config';
@@ -21,8 +22,8 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://unpkg.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://unpkg.com"],
       imgSrc: ["'self'", "data:", "blob:"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
@@ -36,35 +37,49 @@ app.use(helmet({
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors);
+// Apply CORS to all API routes
+app.use('/api', cors); 
 
 // Static files middleware
-app.use(express.static(path.join(__dirname, '../public')));
+app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
+app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Set up EJS as the view engine for admin panel
 app.set('views', adminConfig.views.dir);
 app.set('view engine', adminConfig.views.engine);
+app.use((ejsLayouts as unknown) as RequestHandler);
+app.set('layout', 'layouts/main');
 
 // Session and flash middleware for admin panel
-app.use(
-  (session({
-    secret: adminConfig.sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: adminConfig.cookie.secure,
-      maxAge: adminConfig.cookie.maxAge,
-    }
-  }) as unknown) as RequestHandler
-);
+app.use((session({
+  secret: adminConfig.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
+    httpOnly: true, // Prevent client-side JS from reading the cookie
+    sameSite: 'lax', // Prevents CSRF attacks
+    maxAge: adminConfig.cookie.maxAge,
+  }
+}) as unknown) as RequestHandler);
 
 app.use((connectFlash() as unknown) as RequestHandler);
 
+// Make flash messages available to all views
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  res.locals.warning = req.flash('warning');
+  res.locals.info = req.flash('info');
+  res.locals.messages = req.flash('messages') || {};
+  next();
+});
+
 // Request logging middleware
-app.use(((req: Request, res: Response, next: NextFunction): void => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
-}) as RequestHandler);
+});
 
 // Admin panel routes
 app.use('/admin', adminRoutes);
@@ -73,7 +88,7 @@ app.use('/admin', adminRoutes);
 app.use('/api', apiRoutes);
 
 // Root route for API information
-app.get('/', ((req: Request, res: Response): void => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     name: 'Gemstone Valuation System API',
     version: '1.0.0',
@@ -84,10 +99,10 @@ app.get('/', ((req: Request, res: Response): void => {
       admin: '/admin'
     }
   });
-}) as RequestHandler);
+});
 
 // 404 handler for undefined routes
-app.use(((req: Request, res: Response): void => {
+const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
   // Check if it's an admin route
   if (req.url.startsWith('/admin')) {
     return res.status(404).render('error', {
@@ -101,9 +116,12 @@ app.use(((req: Request, res: Response): void => {
     success: false,
     message: `Route ${req.method} ${req.url} not found`
   });
-}) as RequestHandler);
+};
+
+// Apply 404 handler
+app.use(notFoundHandler);
 
 // Global error handler
-app.use(errorMiddleware as ErrorRequestHandler);
+app.use(errorMiddleware);
 
 export default app;

@@ -1,0 +1,315 @@
+<!-- packages/backend/src/admin/views/dashboard/index.ejs -->
+<!-- This is the main dashboard content -->
+<div class="space-y-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Gemstones Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-primary-500">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                  Total Gemstones
+                </dt>
+                <dd>
+                  <div class="text-lg font-medium text-gray-900">
+                    <%= gemstoneStats.total_gemstones %>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <div class="text-sm">
+            <div class="flex justify-between">
+              <div class="text-green-600 font-medium">
+                <%= gemstoneStats.published_gemstones %> Published
+              </div>
+              <div class="text-yellow-600 font-medium">
+                <%= gemstoneStats.pending_approval %> Pending
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Users Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-green-500">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                  Total Users
+                </dt>
+                <dd>
+                  <div class="text-lg font-medium text-gray-900">
+                    <%= userStats.total_users %>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <div class="text-sm">
+            <div class="flex justify-between">
+              <div class="text-gray-600 font-medium">
+                <%= userStats.cutters %> Cutters
+              </div>
+              <div class="text-gray-600 font-medium">
+                <%= userStats.collectors %> Collectors
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Transfers Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-blue-500">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                  Ownership Transfers
+                </dt>
+                <dd>
+                  <div class="text-lg font-medium text-gray-900">
+                    <%= transferStats.total_transfers %>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <div class="text-sm">
+            <div class="flex justify-between">
+              <div class="text-yellow-600 font-medium">
+                <%= transferStats.pending_transfers %> Pending
+              </div>
+              <div class="text-green-600 font-medium">
+                <%= transferStats.completed_transfers %> Completed
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- System Status Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-yellow-500">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                  System Status
+                </dt>
+                <dd>
+                  <div class="text-lg font-medium text-green-600">
+                    Online
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-5 py-3">
+          <div class="text-sm">
+            <a href="/admin/system/backup" class="text-gray-600 font-medium hover:text-blue-600">
+              Last Backup: 2 days ago
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Admin Security Section -->
+    <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-purple-500">
+      <div class="px-5 py-4 bg-gray-50 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-medium text-gray-900">Admin Security</h3>
+          <a href="/admin/setup-mfa" class="text-sm font-medium text-primary-600 hover:text-primary-800">Manage MFA</a>
+        </div>
+      </div>
+      <div class="p-5">
+        <div class="flex items-center space-x-6">
+          <!-- MFA Status -->
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <span class="text-sm font-medium text-gray-900">Multi-Factor Authentication:</span>
+              <% if (admin && admin.mfa_enabled) { %>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Enabled</span>
+              <% } else { %>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Disabled</span>
+                <a href="/admin/setup-mfa" class="ml-2 text-xs text-primary-600 hover:text-primary-800">Enable now</a>
+              <% } %>
+            </div>
+          </div>
+          
+          <!-- Password Security -->
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <span class="text-sm font-medium text-gray-900">Password Security:</span>
+              <a href="/admin/change-password" class="ml-2 text-xs text-primary-600 hover:text-primary-800">Change password</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Recent Data Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Recent Gemstones -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-5 py-4 bg-gray-50 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900">Recent Gemstones</h3>
+            <a href="/admin/gemstones" class="text-sm font-medium text-primary-600 hover:text-primary-800">View all</a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% if (recentGemstones && recentGemstones.length > 0) { %>
+                  <% recentGemstones.forEach(gemstone => { %>
+                    <tr>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        <a href="/admin/gemstones/<%= gemstone.id %>" class="text-primary-600 hover:text-primary-900">
+                          <%= gemstone.title %>
+                        </a>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                        <%= gemstone.created_by %>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        <% if (gemstone.status === 'published') { %>
+                          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Published
+                          </span>
+                        <% } else if (gemstone.status === 'draft') { %>
+                          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            Draft
+                          </span>
+                        <% } else { %>
+                          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <%= gemstone.status %>
+                          </span>
+                        <% } %>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                        <%= new Date(gemstone.created_at).toLocaleDateString() %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="px-3 py-4 text-center text-sm text-gray-500">
+                      No gemstones found
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Recent Users -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-5 py-4 bg-gray-50 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900">Recent Users</h3>
+            <a href="/admin/users" class="text-sm font-medium text-primary-600 hover:text-primary-800">View all</a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% if (recentUsers && recentUsers.length > 0) { %>
+                  <% recentUsers.forEach(user => { %>
+                    <tr>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        <a href="/admin/users/<%= user.id %>" class="text-primary-600 hover:text-primary-900">
+                          <%= user.username %>
+                        </a>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                        <%= user.email %>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          <%= user.role %>
+                        </span>
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                        <%= new Date(user.created_at).toLocaleDateString() %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="px-3 py-4 text-center text-sm text-gray-500">
+                      No users found
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

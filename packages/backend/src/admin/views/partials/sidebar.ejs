@@ -1,0 +1,110 @@
+<!-- packages/backend/src/admin/views/partials/sidebar.ejs -->
+<div class="flex h-full flex-col">
+    <!-- Logo -->
+    <div class="flex items-center justify-center h-16 border-b border-primary-700">
+      <a href="/admin/dashboard" class="flex items-center">
+        <svg class="h-8 w-8 text-primary-200" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 1.25L3.5 9.75L12 18.25L20.5 9.75L12 1.25ZM12 4.16L17.94 10.1L12 16.04L6.06 10.1L12 4.16Z" />
+          <path d="M12 18.25V22.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        <span class="ml-2 text-xl font-bold text-white">GemAdmin</span>
+      </a>
+    </div>
+  
+    <!-- Navigation Menu -->
+    <nav class="mt-5 flex-1 overflow-y-auto">
+      <div class="px-2 space-y-1">
+        <!-- Dashboard -->
+        <a href="/admin/dashboard" class="<%= (title && title.includes('Dashboard')) ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+          <svg class="text-primary-300 mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Dashboard
+        </a>
+  
+        <!-- Gemstones Section -->
+        <div x-data="{ open: <%= title && (title.includes('Gemstone') || title.includes('Approval')) ? 'true' : 'false' %> }">
+          <button @click="open = !open" class="text-primary-200 hover:bg-primary-700 w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+            <svg class="text-primary-300 mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <span class="flex-1 text-left">Gemstones</span>
+            <svg :class="{'transform rotate-180': open}" class="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="ml-8 mt-2 space-y-1">
+            <a href="/admin/gemstones" class="<%= (title && title === 'All Gemstones') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              All Gemstones
+            </a>
+            <a href="/admin/gemstones/approval" class="<%= (title && title === 'Gemstone Approval Queue') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Approval Queue
+            </a>
+          </div>
+        </div>
+  
+        <!-- Users Section -->
+        <a href="/admin/users" class="<%= (title && title.includes('Users')) ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+          <svg class="text-primary-300 mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Users
+        </a>
+  
+        <!-- Reference Data Section -->
+        <div x-data="{ open: <%= title && title.includes('Reference Data') ? 'true' : 'false' %> }">
+          <button @click="open = !open" class="text-primary-200 hover:bg-primary-700 w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+            <svg class="text-primary-300 mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span class="flex-1 text-left">Reference Data</span>
+            <svg :class="{'transform rotate-180': open}" class="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="ml-8 mt-2 space-y-1">
+            <a href="/admin/reference-data/gemstone-families" class="<%= (title && title === 'Gemstone Families') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Gemstone Families
+            </a>
+            <a href="/admin/reference-data/cut-shapes" class="<%= (title && title === 'Cut Shapes') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Cut Shapes
+            </a>
+            <a href="/admin/reference-data/colors" class="<%= (title && title === 'Colors and Grades') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Colors & Grades
+            </a>
+            <a href="/admin/reference-data/quality-standards" class="<%= (title && title === 'Quality Standards') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Quality Standards
+            </a>
+            <a href="/admin/reference-data/mining-locations" class="<%= (title && title === 'Mining Locations') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Mining Locations
+            </a>
+          </div>
+        </div>
+  
+        <!-- System Section -->
+        <div x-data="{ open: <%= title && title.includes('System') ? 'true' : 'false' %> }">
+          <button @click="open = !open" class="text-primary-200 hover:bg-primary-700 w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md">
+            <svg class="text-primary-300 mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="flex-1 text-left">System</span>
+            <svg :class="{'transform rotate-180': open}" class="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div x-show="open" class="ml-8 mt-2 space-y-1">
+            <a href="/admin/system/settings" class="<%= (title && title === 'System Settings') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Settings
+            </a>
+            <a href="/admin/system/audit-log" class="<%= (title && title === 'Audit Log') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Audit Log
+            </a>
+            <a href="/admin/system/backup" class="<%= (title && title === 'Database Backup and Restore') ? 'bg-primary-700 text-white' : 'text-primary-200 hover:bg-primary-700' %> block px-3 py-2 text-sm font-medium rounded-md">
+              Backup & Restore
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>

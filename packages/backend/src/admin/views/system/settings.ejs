@@ -1,0 +1,180 @@
+<!-- packages/backend/src/admin/views/system/settings.ejs -->
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-semibold text-gray-900">System Settings</h1>
+    </div>
+  
+    <!-- Settings Form -->
+    <form action="/admin/system/settings" method="POST">
+      <div class="space-y-6">
+        <!-- General Settings -->
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+          <div class="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">General Settings</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Basic application settings</p>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <% if (settingsMap.general) { %>
+                <% settingsMap.general.forEach(setting => { %>
+                  <div class="col-span-1">
+                    <label for="<%= setting.key %>" class="block text-sm font-medium text-gray-700">
+                      <%= setting.label %>
+                    </label>
+                    <div class="mt-1">
+                      <% if (setting.type === 'text') { %>
+                        <input type="text" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'number') { %>
+                        <input type="number" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'boolean') { %>
+                        <div class="flex items-center">
+                          <input type="checkbox" name="<%= setting.key %>" id="<%= setting.key %>" value="true" 
+                                 <%= setting.value === 'true' ? 'checked' : '' %>
+                                 class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                          <label for="<%= setting.key %>" class="ml-2 block text-sm text-gray-900">
+                            Enable
+                          </label>
+                        </div>
+                      <% } else if (setting.type === 'select' && setting.options) { %>
+                        <select name="<%= setting.key %>" id="<%= setting.key %>" 
+                                class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                          <% JSON.parse(setting.options).forEach(option => { %>
+                            <option value="<%= option.value %>" <%= setting.value === option.value ? 'selected' : '' %>><%= option.label %></option>
+                          <% }) %>
+                        </select>
+                      <% } %>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500"><%= setting.description %></p>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Email Settings -->
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+          <div class="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Email Settings</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Email configuration and notifications</p>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <% if (settingsMap.email) { %>
+                <% settingsMap.email.forEach(setting => { %>
+                  <div class="col-span-1">
+                    <label for="<%= setting.key %>" class="block text-sm font-medium text-gray-700">
+                      <%= setting.label %>
+                    </label>
+                    <div class="mt-1">
+                      <% if (setting.type === 'text') { %>
+                        <input type="text" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'boolean') { %>
+                        <div class="flex items-center">
+                          <input type="checkbox" name="<%= setting.key %>" id="<%= setting.key %>" value="true" 
+                                 <%= setting.value === 'true' ? 'checked' : '' %>
+                                 class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                          <label for="<%= setting.key %>" class="ml-2 block text-sm text-gray-900">
+                            Enable
+                          </label>
+                        </div>
+                      <% } %>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500"><%= setting.description %></p>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Security Settings -->
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+          <div class="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Security Settings</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">User security and authentication settings</p>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <% if (settingsMap.security) { %>
+                <% settingsMap.security.forEach(setting => { %>
+                  <div class="col-span-1">
+                    <label for="<%= setting.key %>" class="block text-sm font-medium text-gray-700">
+                      <%= setting.label %>
+                    </label>
+                    <div class="mt-1">
+                      <% if (setting.type === 'number') { %>
+                        <input type="number" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'boolean') { %>
+                        <div class="flex items-center">
+                          <input type="checkbox" name="<%= setting.key %>" id="<%= setting.key %>" value="true" 
+                                 <%= setting.value === 'true' ? 'checked' : '' %>
+                                 class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                          <label for="<%= setting.key %>" class="ml-2 block text-sm text-gray-900">
+                            Enable
+                          </label>
+                        </div>
+                      <% } %>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500"><%= setting.description %></p>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Gemstone Settings -->
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+          <div class="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Gemstone Settings</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Gemstone-specific configuration</p>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <% if (settingsMap.gemstones) { %>
+                <% settingsMap.gemstones.forEach(setting => { %>
+                  <div class="col-span-1">
+                    <label for="<%= setting.key %>" class="block text-sm font-medium text-gray-700">
+                      <%= setting.label %>
+                    </label>
+                    <div class="mt-1">
+                      <% if (setting.type === 'text') { %>
+                        <input type="text" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'number') { %>
+                        <input type="number" name="<%= setting.key %>" id="<%= setting.key %>" value="<%= setting.value %>" 
+                               class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                      <% } else if (setting.type === 'boolean') { %>
+                        <div class="flex items-center">
+                          <input type="checkbox" name="<%= setting.key %>" id="<%= setting.key %>" value="true" 
+                                 <%= setting.value === 'true' ? 'checked' : '' %>
+                                 class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                          <label for="<%= setting.key %>" class="ml-2 block text-sm text-gray-900">
+                            Enable
+                          </label>
+                        </div>
+                      <% } %>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500"><%= setting.description %></p>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Save Button -->
+        <div class="flex justify-end">
+          <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>

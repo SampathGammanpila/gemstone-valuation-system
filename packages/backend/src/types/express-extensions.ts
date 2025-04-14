@@ -14,6 +14,12 @@ declare module 'express-session' {
       username: string;
       role: string;
     };
+    // Added properties for enhanced security features
+    tempUserId?: number;
+    tempUserEmail?: string;
+    mfaVerification?: boolean;
+    passwordChangeRequired?: boolean;
+    // Add any other session properties used in the application
   }
 }
 

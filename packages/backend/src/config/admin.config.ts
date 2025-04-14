@@ -8,7 +8,7 @@ export default {
   
   // Cookie settings
   cookie: {
-    secure: environment.nodeEnv === 'production',
+    secure: environment.nodeEnv === 'production', // Only use secure in production
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
   

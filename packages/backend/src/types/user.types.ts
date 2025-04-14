@@ -17,6 +17,14 @@ export interface User {
     created_at: Date;
     updated_at: Date;
     last_login: Date | null;
+    // Added security properties
+    mfa_enabled: boolean;
+    account_locked: boolean;
+    account_locked_until: Date | null;
+    login_attempts: number;
+    password_changed_at: Date | null;
+    password_change_required: boolean;
+    allowed_ips: string | null;
   }
   
   export interface CutterProfile {

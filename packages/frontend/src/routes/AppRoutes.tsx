@@ -7,7 +7,6 @@ import Home from '../pages/user/Home';
 import Login from '../pages/user/Auth/Login';
 import Register from '../pages/user/Auth/Register';
 import ForgotPassword from '../pages/user/Auth/ForgotPassword';
-import GemstoneFamilies from '../pages/admin/Data/GemstoneFamilies';
 import AllCutters from '../pages/user/Cutters/AllCutters';
 import CutterDetail from '../pages/user/Cutters/CutterDetail';
 
@@ -24,9 +23,6 @@ const Unauthorized = () => (
     <p className="text-gray-600">You don't have permission to access this page.</p>
   </div>
 );
-
-// Admin Pages (placeholder)
-const AdminDashboard = () => <div>Admin Dashboard</div>;
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ element: React.ReactNode; roles?: string[] }> = ({ 
@@ -85,10 +81,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/profile/settings" element={<ProtectedRoute element={<ProfileSettings />} />} />
       <Route path="/profile/collection" element={<ProtectedRoute element={<MyCollection />} />} />
       <Route path="/valuation" element={<ProtectedRoute element={<ValuationWizard />} />} />
-
-      {/* Admin routes - require admin role */}
-      <Route path="/admin" element={<ProtectedRoute element={<AdminDashboard />} roles={['admin']} />} />
-      <Route path="/admin/data/gemstone-families" element={<ProtectedRoute element={<GemstoneFamilies />} roles={['admin']} />} />
 
       {/* 404 redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

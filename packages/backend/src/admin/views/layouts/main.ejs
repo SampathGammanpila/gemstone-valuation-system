@@ -1,231 +1,166 @@
-<!-- packages/backend/src/admin/views/dashboard/index.ejs -->
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h1>
-      <p class="lead">System overview and statistics</p>
-    </div>
+<!-- packages/backend/src/admin/views/layouts/main.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Gemstone Admin</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/admin/images/favicon.png">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="/admin/css/admin-styles.css">
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen">
+  <div x-data="{ sidebarOpen: true }" class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <% if (typeof admin !== 'undefined' && admin) { %>
+      <div x-show="sidebarOpen" class="fixed inset-y-0 left-0 z-50 w-64 bg-primary-800 text-white transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-auto lg:z-auto">
+        <%- include('../partials/sidebar') %>
+      </div>
+    <% } %>
     
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-      <!-- Gemstones Card -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                  Total Gemstones</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800"><%= gemstoneStats.total_gemstones %></div>
+    <!-- Page Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- Top Navbar -->
+      <% if (typeof admin !== 'undefined' && admin) { %>
+        <header class="bg-white shadow">
+          <div class="px-4 py-3 flex items-center justify-between">
+            <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-gray-500 focus:outline-none">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            
+            <%- include('../partials/header') %>
+          </div>
+        </header>
+      <% } %>
+      
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto p-6">
+        <!-- Flash Messages -->
+        <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+          <div class="mb-6 bg-green-100 border-l-4 border-green-600 text-green-700 p-4 rounded shadow-sm" role="alert" x-data="{ show: true }" x-show="show">
+            <div class="flex items-center">
+              <div class="py-1">
+                <svg class="h-6 w-6 text-green-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <div class="col-auto">
-                <i class="fas fa-gem fa-2x text-gray-300"></i>
+              <div>
+                <p class="font-bold">Success</p>
+                <p class="text-sm"><%= success %></p>
+              </div>
+              <div class="ml-auto">
+                <button @click="show = false" class="text-green-600 hover:text-green-800">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
-          <div class="card-footer bg-light">
-            <div class="row">
-              <div class="col-6">
-                <small class="text-success">
-                  <i class="fas fa-check-circle"></i> <%= gemstoneStats.published_gemstones %> Published
-                </small>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+          <div class="mb-6 bg-red-100 border-l-4 border-red-600 text-red-700 p-4 rounded shadow-sm" role="alert" x-data="{ show: true }" x-show="show">
+            <div class="flex items-center">
+              <div class="py-1">
+                <svg class="h-6 w-6 text-red-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
-              <div class="col-6">
-                <small class="text-warning">
-                  <i class="fas fa-clock"></i> <%= gemstoneStats.pending_approval %> Pending
-                </small>
+              <div>
+                <p class="font-bold">Error</p>
+                <p class="text-sm"><%= error %></p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Users Card -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                  Total Users</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800"><%= userStats.total_users %></div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-users fa-2x text-gray-300"></i>
+              <div class="ml-auto">
+                <button @click="show = false" class="text-red-600 hover:text-red-800">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
-          <div class="card-footer bg-light">
-            <div class="row">
-              <div class="col">
-                <small class="text-muted">
-                  <i class="fas fa-user"></i> <%= userStats.collectors %> Collectors
-                </small>
-              </div>
-              <div class="col">
-                <small class="text-muted">
-                  <i class="fas fa-cut"></i> <%= userStats.cutters %> Cutters
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Transfers Card -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                  Ownership Transfers</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800"><%= transferStats.total_transfers %></div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+        <% } %>
+        
+        <% if (typeof messages !== 'undefined') { %>
+          <% if (messages.success) { %>
+            <div class="mb-6 bg-green-100 border-l-4 border-green-600 text-green-700 p-4 rounded shadow-sm" role="alert" x-data="{ show: true }" x-show="show">
+              <div class="flex items-center">
+                <div class="py-1">
+                  <svg class="h-6 w-6 text-green-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-bold">Success</p>
+                  <p class="text-sm"><%= messages.success %></p>
+                </div>
+                <div class="ml-auto">
+                  <button @click="show = false" class="text-green-600 hover:text-green-800">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="card-footer bg-light">
-            <div class="row">
-              <div class="col">
-                <small class="text-warning">
-                  <i class="fas fa-clock"></i> <%= transferStats.pending_transfers %> Pending
-                </small>
-              </div>
-              <div class="col">
-                <small class="text-success">
-                  <i class="fas fa-check-circle"></i> <%= transferStats.completed_transfers %> Completed
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- System Status Card -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                  System Status</div>
-                <div class="h5 mb-0 font-weight-bold text-success">Online</div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-server fa-2x text-gray-300"></i>
+          <% } %>
+          
+          <% if (messages.error) { %>
+            <div class="mb-6 bg-red-100 border-l-4 border-red-600 text-red-700 p-4 rounded shadow-sm" role="alert" x-data="{ show: true }" x-show="show">
+              <div class="flex items-center">
+                <div class="py-1">
+                  <svg class="h-6 w-6 text-red-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-bold">Error</p>
+                  <p class="text-sm"><%= messages.error %></p>
+                </div>
+                <div class="ml-auto">
+                  <button @click="show = false" class="text-red-600 hover:text-red-800">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
+          <% } %>
+        <% } %>
+        
+        <!-- Main Content -->
+        <%- body %>
+      </main>
+      
+      <!-- Footer -->
+      <% if (typeof admin !== 'undefined' && admin) { %>
+        <footer class="bg-white border-t border-gray-200 py-4">
+          <div class="container mx-auto px-4">
+            <%- include('../partials/footer') %>
           </div>
-          <div class="card-footer bg-light">
-            <small class="text-muted">
-              <i class="fas fa-clock"></i> Last Backup: 2 days ago
-            </small>
+        </footer>
+      <% } else if (title !== 'Login') { %>
+        <footer class="bg-white border-t border-gray-200 py-4">
+          <div class="container mx-auto px-4">
+            <p class="text-center text-gray-600 text-sm">
+              &copy; <%= new Date().getFullYear() %> Gemstone Valuation System
+            </p>
           </div>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Recent Data -->
-    <div class="row">
-      <!-- Recent Gemstones -->
-      <div class="col-xl-6 mb-4">
-        <div class="card">
-          <div class="card-header bg-light">
-            <h6 class="m-0 font-weight-bold">Recent Gemstones</h6>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Created By</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (recentGemstones && recentGemstones.length > 0) { %>
-                    <% recentGemstones.forEach(gemstone => { %>
-                      <tr>
-                        <td>
-                          <a href="/admin/gemstones/<%= gemstone.id %>"><%= gemstone.title %></a>
-                        </td>
-                        <td><%= gemstone.created_by %></td>
-                        <td>
-                          <% if (gemstone.status === 'published') { %>
-                            <span class="badge bg-success">Published</span>
-                          <% } else if (gemstone.status === 'draft') { %>
-                            <span class="badge bg-secondary">Draft</span>
-                          <% } else { %>
-                            <span class="badge bg-info"><%= gemstone.status %></span>
-                          <% } %>
-                        </td>
-                        <td><%= new Date(gemstone.created_at).toLocaleDateString() %></td>
-                      </tr>
-                    <% }) %>
-                  <% } else { %>
-                    <tr>
-                      <td colspan="4" class="text-center">No gemstones found</td>
-                    </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-            <div class="text-end mt-3">
-              <a href="/admin/gemstones" class="btn btn-sm btn-primary">View All</a>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Recent Users -->
-      <div class="col-xl-6 mb-4">
-        <div class="card">
-          <div class="card-header bg-light">
-            <h6 class="m-0 font-weight-bold">Recent Users</h6>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (recentUsers && recentUsers.length > 0) { %>
-                    <% recentUsers.forEach(user => { %>
-                      <tr>
-                        <td>
-                          <a href="/admin/users/<%= user.id %>"><%= user.username %></a>
-                        </td>
-                        <td><%= user.email %></td>
-                        <td>
-                          <span class="badge bg-primary"><%= user.role %></span>
-                        </td>
-                        <td><%= new Date(user.created_at).toLocaleDateString() %></td>
-                      </tr>
-                    <% }) %>
-                  <% } else { %>
-                    <tr>
-                      <td colspan="4" class="text-center">No users found</td>
-                    </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-            <div class="text-end mt-3">
-              <a href="/admin/users" class="btn btn-sm btn-primary">View All</a>
-            </div>
-          </div>
-        </div>
-      </div>
+        </footer>
+      <% } %>
     </div>
   </div>
+  
+  <!-- Custom JS -->
+  <script src="/admin/js/admin.js"></script>
+</body>
+</html>
