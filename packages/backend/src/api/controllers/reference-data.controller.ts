@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+// packages/backend/src/api/controllers/reference-data.controller.ts
+import { Request, Response, NextFunction } from 'express';
 import referenceDataService from '../../services/referenceData.service';
 
 // Reference data controller for handling HTTP requests
 class ReferenceDataController {
   // Get all gemstone families
-  getAllGemstoneFamilies = async (req: Request, res: Response): Promise<void> => {
+  getAllGemstoneFamilies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const families = await referenceDataService.getAllGemstoneFamilies();
       res.status(200).json({
@@ -22,7 +23,7 @@ class ReferenceDataController {
   };
 
   // Get a specific gemstone family by ID
-  getGemstoneFamilyById = async (req: Request, res: Response): Promise<void> => {
+  getGemstoneFamilyById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
       const family = await referenceDataService.getGemstoneFamilyById(id);
@@ -50,7 +51,7 @@ class ReferenceDataController {
   };
 
   // Create a new gemstone family
-  createGemstoneFamily = async (req: Request, res: Response): Promise<void> => {
+  createGemstoneFamily = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const newFamily = await referenceDataService.createGemstoneFamily(req.body);
       res.status(201).json({
@@ -69,7 +70,7 @@ class ReferenceDataController {
   };
 
   // Update an existing gemstone family
-  updateGemstoneFamily = async (req: Request, res: Response): Promise<void> => {
+  updateGemstoneFamily = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
       const updatedFamily = await referenceDataService.updateGemstoneFamily(id, req.body);
@@ -98,7 +99,7 @@ class ReferenceDataController {
   };
 
   // Delete a gemstone family
-  deleteGemstoneFamily = async (req: Request, res: Response): Promise<void> => {
+  deleteGemstoneFamily = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
       const deletedFamily = await referenceDataService.deleteGemstoneFamily(id);
