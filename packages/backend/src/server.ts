@@ -50,11 +50,11 @@ app.set('view engine', adminConfig.views.engine);
 app.use((ejsLayouts as unknown) as RequestHandler);
 app.set('layout', 'layouts/main');
 
-// Session and flash middleware for admin panel
+// Session configuration in server.ts
 app.use((session({
   secret: adminConfig.sessionSecret,
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Changed from false to true to ensure sessions are saved
+  saveUninitialized: true, // Changed from false to true to ensure new sessions are saved
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
     httpOnly: true, // Prevent client-side JS from reading the cookie

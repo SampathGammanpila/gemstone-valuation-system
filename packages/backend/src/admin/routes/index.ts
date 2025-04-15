@@ -6,25 +6,30 @@ import userRoutes from './user.routes';
 import gemstoneRoutes from './gemstone.routes';
 import referenceDataRoutes from './reference-data.routes';
 import systemRoutes from './system.routes';
-import { requireAdmin } from '../middlewares/admin-auth.middleware';
+import { authenticate, requireAdmin } from '../middlewares/admin-auth.middleware';
+import { createHandler } from '../../types/express.types';
 
 const router = Router();
 
 // Auth routes (no authentication required)
-router.get('/login', authController.getLoginPage);
-router.post('/login', authController.loginAdmin);
-router.get('/logout', authController.logoutAdmin);
+router.get('/login', createHandler(authController.getLoginPage));
+router.post('/login', createHandler(authController.loginAdmin));
+router.get('/logout', createHandler(authController.logoutAdmin));
 
-// Password change routes
-router.get('/change-password', authController.getChangePasswordPage);
-router.post('/change-password', authController.changePassword);
+// Password change routes - No authentication check here to avoid redirect loops
+// The controller will handle proper validation
+router.get('/change-password', createHandler(authController.getChangePasswordPage));
+router.post('/change-password', createHandler(authController.changePassword));
 
-// MFA setup routes (require authentication)
-router.get('/setup-mfa', requireAdmin, authController.getSetupMfaPage);
-router.post('/setup-mfa', requireAdmin, authController.enableMfa);
-router.post('/disable-mfa', requireAdmin, authController.disableMfa);
+// Routes requiring authentication
+router.use(authenticate);
 
-// Use other route modules
+// MFA setup routes
+router.get('/setup-mfa', requireAdmin, createHandler(authController.getSetupMfaPage));
+router.post('/setup-mfa', requireAdmin, createHandler(authController.enableMfa));
+router.post('/disable-mfa', requireAdmin, createHandler(authController.disableMfa));
+
+// Use other route modules with additional admin role check
 router.use('/dashboard', requireAdmin, dashboardRoutes);
 router.use('/users', requireAdmin, userRoutes);
 router.use('/gemstones', requireAdmin, gemstoneRoutes);

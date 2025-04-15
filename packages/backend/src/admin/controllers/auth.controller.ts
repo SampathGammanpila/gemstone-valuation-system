@@ -31,10 +31,10 @@ class AdminAuthController {
     });
   }
   
-  /**
-   * Admin login post
-   */
-  async loginAdmin(req: Request, res: Response) {
+/**
+ * Admin login post
+ */
+async loginAdmin(req: Request, res: Response) {
     try {
       // Check if we're in MFA verification mode
       if (req.session.mfaVerification) {
@@ -60,8 +60,11 @@ class AdminAuthController {
           role: 'admin'
         };
         
-        // Redirect to dashboard
-        return res.redirect('/admin/dashboard');
+        // Explicitly save session before redirecting
+        return req.session.save(() => {
+          // Redirect to dashboard
+          res.redirect('/admin/dashboard');
+        });
       }
       
       // Continue with normal DB authentication if we reach this point
@@ -151,7 +154,10 @@ class AdminAuthController {
         req.session.tempUserEmail = user.email;
         req.session.mfaVerification = true;
         
-        return res.redirect('/admin/login');
+        // Explicitly save session before redirecting
+        return req.session.save(() => {
+          res.redirect('/admin/login');
+        });
       }
       
       // Check if password change is required
@@ -159,7 +165,10 @@ class AdminAuthController {
         req.session.tempUserId = user.id;
         req.session.passwordChangeRequired = true;
         
-        return res.redirect('/admin/change-password');
+        // Explicitly save session before redirecting
+        return req.session.save(() => {
+          res.redirect('/admin/change-password');
+        });
       }
       
       // Generate JWT token
@@ -198,8 +207,11 @@ class AdminAuthController {
         console.error('Failed to update audit log or last login time, but continuing:', auditError);
       }
       
-      // Redirect to dashboard
-      res.redirect('/admin/dashboard');
+      // Explicitly save session before redirecting
+      req.session.save(() => {
+        // Redirect to dashboard
+        res.redirect('/admin/dashboard');
+      });
     } catch (error) {
       console.error('Admin login error:', error);
       
@@ -216,8 +228,11 @@ class AdminAuthController {
           role: 'admin'
         };
         
-        // Redirect to dashboard
-        return res.redirect('/admin/dashboard');
+        // Explicitly save session before redirecting
+        return req.session.save(() => {
+          // Redirect to dashboard
+          res.redirect('/admin/dashboard');
+        });
       }
       
       req.flash('error', 'Login failed. Database might be unavailable.');
@@ -225,14 +240,17 @@ class AdminAuthController {
     }
   }
   
-  /**
-   * Verify MFA code
-   */
-  async verifyMfaCode(req: Request, res: Response) {
+/**
+ * Verify MFA code
+ */
+async verifyMfaCode(req: Request, res: Response) {
     try {
       const { mfaCode } = req.body;
       
       if (!req.session.tempUserId || !req.session.mfaVerification) {
+        // Clear any potentially problematic session states
+        req.session.mfaVerification = false;
+        req.session.tempUserId = undefined;
         req.flash('error', 'Authentication required');
         return res.redirect('/admin/login');
       }
@@ -246,9 +264,10 @@ class AdminAuthController {
       `, [userId]);
       
       if (mfaResult.rows.length === 0) {
-        req.flash('error', 'MFA not set up properly. Please contact administrator.');
+        // Clear MFA verification flag to prevent redirect loops
         req.session.mfaVerification = false;
         req.session.tempUserId = undefined;
+        req.flash('error', 'MFA not set up properly. Please contact administrator.');
         return res.redirect('/admin/login');
       }
       
@@ -258,8 +277,12 @@ class AdminAuthController {
       const isValid = authenticator.verify({ token: mfaCode, secret });
       
       if (!isValid) {
+        // Don't clear the MFA verification flag, but provide clear error
         req.flash('error', 'Invalid MFA code. Please try again.');
-        return res.redirect('/admin/login');
+        // Save session explicitly before redirecting
+        return req.session.save(() => {
+          res.redirect('/admin/login');
+        });
       }
       
       // Clear MFA verification flag
@@ -279,7 +302,10 @@ class AdminAuthController {
       // Check if password change is required
       if (user.password_change_required) {
         req.session.passwordChangeRequired = true;
-        return res.redirect('/admin/change-password');
+        // Save session explicitly before redirecting
+        return req.session.save(() => {
+          res.redirect('/admin/change-password');
+        });
       }
       
       // Generate JWT token
@@ -316,13 +342,19 @@ class AdminAuthController {
       // Update last login
       await userModel.updateLastLogin(user.id);
       
-      // Redirect to dashboard
-      res.redirect('/admin/dashboard');
+      // Save session explicitly before redirecting
+      req.session.save(() => {
+        // Redirect to dashboard
+        res.redirect('/admin/dashboard');
+      });
     } catch (error) {
       console.error('MFA verification error:', error);
-      req.flash('error', 'MFA verification failed');
+      // Clear MFA verification flag to prevent redirect loops
       req.session.mfaVerification = false;
-      res.redirect('/admin/login');
+      req.flash('error', 'MFA verification failed');
+      req.session.save(() => {
+        res.redirect('/admin/login');
+      });
     }
   }
   

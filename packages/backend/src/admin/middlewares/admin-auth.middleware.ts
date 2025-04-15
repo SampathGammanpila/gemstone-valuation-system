@@ -4,12 +4,18 @@ import jwt from 'jsonwebtoken';
 import userModel from '../../db/models/user.model';
 import environment from '../../config/environment';
 
-// Extended Request type is defined in types/express-extensions.d.ts
-
 /**
  * Middleware to authenticate admin requests
  */
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+  // Check if user is in MFA verification or password change flow
+  if (req.session.mfaVerification || req.session.passwordChangeRequired) {
+    // Allow access to these specific routes without full admin authentication
+    if (req.path === '/login' || req.path === '/change-password') {
+      return next();
+    }
+  }
+
   // Check if user is logged in
   if (!req.session || !req.session.adminUser) {
     req.flash('error', 'You must be logged in to access this page');
