@@ -145,25 +145,23 @@ class AuthController {
       // Generate a random token
       const csrfToken = crypto.randomBytes(32).toString('hex');
       
-      // Store the token in the session if available
+      // Store the token in the session
       if (req.session) {
-        // Use type assertion to address TypeScript error
-        (req.session as CustomSession).csrfToken = csrfToken;
+        req.session.csrfToken = csrfToken;
       }
       
-      // Set cookie with the token (as a backup if session storage fails)
+      // Set cookie with the token
       res.cookie('XSRF-TOKEN', csrfToken, {
         httpOnly: false, // Must be false so client JS can read it
-        secure: process.env.NODE_ENV === 'production', // Secure in production
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 3600000 // 1 hour
       });
       
+      // Return the token in the response
       res.status(200).json({
         success: true,
-        data: {
-          csrfToken
-        }
+        csrfToken
       });
     } catch (error) {
       console.error('CSRF token generation error:', error);

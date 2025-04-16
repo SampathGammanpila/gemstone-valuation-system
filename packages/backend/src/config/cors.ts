@@ -5,7 +5,14 @@ import environment from './environment';
 const corsOptions = {
   origin: environment.frontendUrl,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-CSRF-Token', 
+    'X-Requested-With',
+    'X-Content-Type-Options',
+    'X-Frame-Options'
+  ],
   credentials: true
 };
 

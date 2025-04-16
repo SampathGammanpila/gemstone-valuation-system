@@ -1,13 +1,13 @@
 // packages/backend/src/admin/controllers/auth.controller.ts
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt'; // Add this import for password hashing
 import userModel from '../../db/models/user.model';
 import environment from '../../config/environment';
 import { validateAdminToken } from '../middlewares/admin-auth.middleware';
 import pool from '../../config/database';
 import crypto from 'crypto';
 import { authenticator } from 'otplib';
-import '../../../types/express-session'; // Ensure session types are imported
 
 // Use a type assertion for req.session to suppress TypeScript errors
 // This is a workaround until we fix all session type definitions
