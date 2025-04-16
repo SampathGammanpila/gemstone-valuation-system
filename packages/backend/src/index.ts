@@ -1,3 +1,6 @@
+// Import session type definitions early to ensure they're available
+import './types/express-session';
+
 import app from './server';
 import environment from './config/environment';
 

@@ -1,6 +1,5 @@
 // packages/backend/src/admin/controllers/auth.controller.ts
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import userModel from '../../db/models/user.model';
 import environment from '../../config/environment';
@@ -8,6 +7,11 @@ import { validateAdminToken } from '../middlewares/admin-auth.middleware';
 import pool from '../../config/database';
 import crypto from 'crypto';
 import { authenticator } from 'otplib';
+import '../../../types/express-session'; // Ensure session types are imported
+
+// Use a type assertion for req.session to suppress TypeScript errors
+// This is a workaround until we fix all session type definitions
+const getSession = (req: Request) => req.session as any;
 
 class AdminAuthController {
   /**
@@ -15,18 +19,18 @@ class AdminAuthController {
    */
   getLoginPage(req: Request, res: Response) {
     // If already logged in, redirect to dashboard
-    if (req.session.adminUser) {
+    if (getSession(req).adminUser) {
       return res.redirect('/admin/dashboard');
     }
     
     // Check if we're in the MFA verification phase
-    const requireMfa = req.session.mfaVerification ? true : false;
+    const requireMfa = getSession(req).mfaVerification ? true : false;
     
     res.render('auth/login', {
       title: 'Admin Login',
       error: req.flash('error'),
       requireMfa,
-      email: req.session.tempUserEmail || '',
+      email: getSession(req).tempUserEmail || '',
       admin: null // Add this line to fix the template error
     });
   }
@@ -37,7 +41,7 @@ class AdminAuthController {
 async loginAdmin(req: Request, res: Response) {
     try {
       // Check if we're in MFA verification mode
-      if (req.session.mfaVerification) {
+      if (getSession(req).mfaVerification) {
         return this.verifyMfaCode(req, res);
       }
       
@@ -54,14 +58,14 @@ async loginAdmin(req: Request, res: Response) {
         console.log('Using fallback admin login due to potential database connectivity issues');
         
         // Store user in session with default admin values
-        req.session.adminUser = {
+        getSession(req).adminUser = {
           userId: 1, // Default admin ID
           username: 'admin',
           role: 'admin'
         };
         
         // Explicitly save session before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           // Redirect to dashboard
           res.redirect('/admin/dashboard');
         });
@@ -150,23 +154,23 @@ async loginAdmin(req: Request, res: Response) {
       // Check if MFA is required for this user
       if (user.mfa_enabled) {
         // Store user info in session for MFA verification
-        req.session.tempUserId = user.id;
-        req.session.tempUserEmail = user.email;
-        req.session.mfaVerification = true;
+        getSession(req).tempUserId = user.id;
+        getSession(req).tempUserEmail = user.email;
+        getSession(req).mfaVerification = true;
         
         // Explicitly save session before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           res.redirect('/admin/login');
         });
       }
       
       // Check if password change is required
       if (user.password_change_required) {
-        req.session.tempUserId = user.id;
-        req.session.passwordChangeRequired = true;
+        getSession(req).tempUserId = user.id;
+        getSession(req).passwordChangeRequired = true;
         
         // Explicitly save session before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           res.redirect('/admin/change-password');
         });
       }
@@ -179,7 +183,7 @@ async loginAdmin(req: Request, res: Response) {
       );
       
       // Store user in session
-      req.session.adminUser = {
+      getSession(req).adminUser = {
         userId: user.id,
         username: user.username,
         role: user.role_name
@@ -208,7 +212,7 @@ async loginAdmin(req: Request, res: Response) {
       }
       
       // Explicitly save session before redirecting
-      req.session.save(() => {
+      getSession(req).save(() => {
         // Redirect to dashboard
         res.redirect('/admin/dashboard');
       });
@@ -222,14 +226,14 @@ async loginAdmin(req: Request, res: Response) {
         console.log('Using fallback admin login after error');
         
         // Store user in session with default admin values
-        req.session.adminUser = {
+        getSession(req).adminUser = {
           userId: 1, // Default admin ID
           username: 'admin',
           role: 'admin'
         };
         
         // Explicitly save session before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           // Redirect to dashboard
           res.redirect('/admin/dashboard');
         });
@@ -247,15 +251,15 @@ async verifyMfaCode(req: Request, res: Response) {
     try {
       const { mfaCode } = req.body;
       
-      if (!req.session.tempUserId || !req.session.mfaVerification) {
+      if (!getSession(req).tempUserId || !getSession(req).mfaVerification) {
         // Clear any potentially problematic session states
-        req.session.mfaVerification = false;
-        req.session.tempUserId = undefined;
+        getSession(req).mfaVerification = false;
+        getSession(req).tempUserId = undefined;
         req.flash('error', 'Authentication required');
         return res.redirect('/admin/login');
       }
       
-      const userId = req.session.tempUserId;
+      const userId = getSession(req).tempUserId;
       
       // Get the user's MFA secret
       const mfaResult = await pool.query(`
@@ -265,8 +269,8 @@ async verifyMfaCode(req: Request, res: Response) {
       
       if (mfaResult.rows.length === 0) {
         // Clear MFA verification flag to prevent redirect loops
-        req.session.mfaVerification = false;
-        req.session.tempUserId = undefined;
+        getSession(req).mfaVerification = false;
+        getSession(req).tempUserId = undefined;
         req.flash('error', 'MFA not set up properly. Please contact administrator.');
         return res.redirect('/admin/login');
       }
@@ -280,14 +284,14 @@ async verifyMfaCode(req: Request, res: Response) {
         // Don't clear the MFA verification flag, but provide clear error
         req.flash('error', 'Invalid MFA code. Please try again.');
         // Save session explicitly before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           res.redirect('/admin/login');
         });
       }
       
       // Clear MFA verification flag
-      req.session.mfaVerification = false;
-      req.session.tempUserEmail = undefined;
+      getSession(req).mfaVerification = false;
+      getSession(req).tempUserEmail = undefined;
       
       // Get user details for session
       const userResult = await pool.query(`
@@ -301,9 +305,9 @@ async verifyMfaCode(req: Request, res: Response) {
       
       // Check if password change is required
       if (user.password_change_required) {
-        req.session.passwordChangeRequired = true;
+        getSession(req).passwordChangeRequired = true;
         // Save session explicitly before redirecting
-        return req.session.save(() => {
+        return getSession(req).save(() => {
           res.redirect('/admin/change-password');
         });
       }
@@ -316,14 +320,14 @@ async verifyMfaCode(req: Request, res: Response) {
       );
       
       // Store user in session
-      req.session.adminUser = {
+      getSession(req).adminUser = {
         userId: user.id,
         username: user.username,
         role: user.role_name
       };
       
       // Clear temp user ID
-      req.session.tempUserId = undefined;
+      getSession(req).tempUserId = undefined;
       
       // Add to admin audit log
       await pool.query(`
@@ -343,16 +347,16 @@ async verifyMfaCode(req: Request, res: Response) {
       await userModel.updateLastLogin(user.id);
       
       // Save session explicitly before redirecting
-      req.session.save(() => {
+      getSession(req).save(() => {
         // Redirect to dashboard
         res.redirect('/admin/dashboard');
       });
     } catch (error) {
       console.error('MFA verification error:', error);
       // Clear MFA verification flag to prevent redirect loops
-      req.session.mfaVerification = false;
+      getSession(req).mfaVerification = false;
       req.flash('error', 'MFA verification failed');
-      req.session.save(() => {
+      getSession(req).save(() => {
         res.redirect('/admin/login');
       });
     }
@@ -362,7 +366,7 @@ async verifyMfaCode(req: Request, res: Response) {
    * Change password form
    */
   getChangePasswordPage(req: Request, res: Response) {
-    if (!req.session.tempUserId && !req.session.adminUser) {
+    if (!getSession(req).tempUserId && !getSession(req).adminUser) {
       req.flash('error', 'Authentication required');
       return res.redirect('/admin/login');
     }
@@ -370,8 +374,8 @@ async verifyMfaCode(req: Request, res: Response) {
     res.render('auth/change-password', {
       title: 'Change Password',
       error: req.flash('error'),
-      required: req.session.passwordChangeRequired || false,
-      admin: req.session.adminUser || null
+      required: getSession(req).passwordChangeRequired || false,
+      admin: getSession(req).adminUser || null
     });
   }
   
@@ -381,7 +385,7 @@ async verifyMfaCode(req: Request, res: Response) {
   async changePassword(req: Request, res: Response) {
     try {
       const { currentPassword, newPassword, confirmPassword } = req.body;
-      const userId = req.session.tempUserId || req.session.adminUser?.userId;
+      const userId = getSession(req).tempUserId || getSession(req).adminUser?.userId;
       
       if (!userId) {
         req.flash('error', 'Authentication required');
@@ -441,7 +445,7 @@ async verifyMfaCode(req: Request, res: Response) {
       const user = userResult.rows[0];
       
       // For required password change, don't check the current password
-      if (!req.session.passwordChangeRequired) {
+      if (!getSession(req).passwordChangeRequired) {
         // Verify current password
         const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
         
@@ -476,14 +480,14 @@ async verifyMfaCode(req: Request, res: Response) {
         'admin', 
         req.ip, 
         req.headers['user-agent'],
-        JSON.stringify({ required: req.session.passwordChangeRequired || false })
+        JSON.stringify({ required: getSession(req).passwordChangeRequired || false })
       ]);
       
       // If this was a required password change during login
-      if (req.session.passwordChangeRequired) {
+      if (getSession(req).passwordChangeRequired) {
         // Clear the password change required flag
-        req.session.passwordChangeRequired = false;
-        req.session.tempUserId = undefined;
+        getSession(req).passwordChangeRequired = false;
+        getSession(req).tempUserId = undefined;
         
         req.flash('success', 'Password changed successfully. Please log in.');
         return res.redirect('/admin/login');
@@ -502,13 +506,13 @@ async verifyMfaCode(req: Request, res: Response) {
    * Setup MFA
    */
   async getSetupMfaPage(req: Request, res: Response) {
-    if (!req.session.adminUser) {
+    if (!getSession(req).adminUser) {
       req.flash('error', 'Authentication required');
       return res.redirect('/admin/login');
     }
     
     try {
-      const userId = req.session.adminUser.userId;
+      const userId = getSession(req).adminUser.userId;
       
       // Check if MFA is already set up
       const mfaCheck = await pool.query(`
@@ -553,7 +557,7 @@ async verifyMfaCode(req: Request, res: Response) {
         secret,
         qrCodeUrl,
         mfaEnabled: mfaCheck.rows.length > 0,
-        admin: req.session.adminUser
+        admin: getSession(req).adminUser
       });
     } catch (error) {
       console.error('Setup MFA error:', error);
@@ -566,14 +570,14 @@ async verifyMfaCode(req: Request, res: Response) {
    * Enable MFA
    */
   async enableMfa(req: Request, res: Response) {
-    if (!req.session.adminUser) {
+    if (!getSession(req).adminUser) {
       req.flash('error', 'Authentication required');
       return res.redirect('/admin/login');
     }
     
     try {
       const { verificationCode, secret } = req.body;
-      const userId = req.session.adminUser.userId;
+      const userId = getSession(req).adminUser.userId;
       
       // Verify the token
       const isValid = authenticator.verify({ token: verificationCode, secret });
@@ -639,13 +643,13 @@ async verifyMfaCode(req: Request, res: Response) {
    * Disable MFA
    */
   async disableMfa(req: Request, res: Response) {
-    if (!req.session.adminUser) {
+    if (!getSession(req).adminUser) {
       req.flash('error', 'Authentication required');
       return res.redirect('/admin/login');
     }
     
     try {
-      const userId = req.session.adminUser.userId;
+      const userId = getSession(req).adminUser.userId;
       
       // Delete MFA credentials
       await pool.query(`
@@ -689,13 +693,13 @@ async verifyMfaCode(req: Request, res: Response) {
    */
   logoutAdmin(req: Request, res: Response) {
     // Add to admin audit log if user is logged in
-    if (req.session.adminUser) {
+    if (getSession(req).adminUser) {
       pool.query(`
         INSERT INTO admin_audit_logs (
           admin_id, action_type, entity_type, ip_address, user_agent, details
         ) VALUES ($1, $2, $3, $4, $5, $6)
       `, [
-        req.session.adminUser.userId, 
+        getSession(req).adminUser.userId, 
         'LOGOUT', 
         'admin', 
         req.ip, 

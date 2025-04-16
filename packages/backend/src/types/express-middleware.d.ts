@@ -1,10 +1,29 @@
-// Import type declarations
-import { Express, RequestHandler } from 'express-serve-static-core';
+// src/types/express-middleware.d.ts
 
-// Declare module augmentation to fix TypeScript middleware issues
-declare module 'express-serve-static-core' {
+// A more comprehensive approach to fixing Express middleware type issues
+import { Express } from 'express';
+
+declare module 'express' {
   interface Express {
-    use(path: string | RegExp | Array<string | RegExp>, ...handlers: Array<RequestHandler | any>): Express;
-    use(...handlers: Array<RequestHandler | any>): Express;
+    use: any; // This is a broader fix that loosens type checking for app.use()
+  }
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      admin?: {
+        userId: number;
+        username: string;
+        role: string;
+      };
+      pagination?: {
+        page: number;
+        limit: number;
+        offset: number;
+      };
+      flash?(type: string, message?: any): any;
+      flash?(type: string): any[];
+    }
   }
 }

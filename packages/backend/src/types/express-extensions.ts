@@ -1,12 +1,7 @@
-// Create a new file: src/types/express-extensions.ts (note: .ts not .d.ts)
-
+// src/types/express-extensions.d.ts
 import 'express-session';
-import 'connect-flash';
 
-// This file just declares the type extensions
-// No need to export anything
-
-// Just having these declarations will extend the types
+// Extend Express Session
 declare module 'express-session' {
   interface SessionData {
     adminUser?: {
@@ -14,23 +9,10 @@ declare module 'express-session' {
       username: string;
       role: string;
     };
-    // Added properties for enhanced security features
-    tempUserId?: number;
-    tempUserEmail?: string;
+    csrfToken?: string;
     mfaVerification?: boolean;
     passwordChangeRequired?: boolean;
-    // Add any other session properties used in the application
-  }
-}
-
-declare module 'express' {
-  interface Request {
-    admin?: {
-      userId: number;
-      username: string;
-      role: string;
-    };
-    flash(type: string, message?: any): any;
-    flash(type: string): any[];
+    tempUserId?: number;
+    tempUserEmail?: string;
   }
 }
