@@ -106,23 +106,25 @@ class DashboardController {
           JOIN roles r ON u.role_id = r.id
         `);
         
-        // Get recent gemstones
-        const recentGemstones = await pool.query(`
-          SELECT g.id, g.title, g.status, g.created_at, u.username AS created_by
-          FROM gemstones g
-          JOIN users u ON g.user_id = u.id
-          ORDER BY g.created_at DESC
-          LIMIT 10
-        `);
+        // Get recent gemstones - Fix SQL Injection vulnerability by using parameterized queries
+        const recentGemstones = await pool.query(
+          `SELECT g.id, g.title, g.status, g.created_at, u.username AS created_by
+           FROM gemstones g
+           JOIN users u ON g.user_id = u.id
+           ORDER BY g.created_at DESC
+           LIMIT $1`,
+          [10]
+        );
         
-        // Get recent users
-        const recentUsers = await pool.query(`
-          SELECT u.id, u.username, u.email, u.created_at, r.name AS role
-          FROM users u
-          JOIN roles r ON u.role_id = r.id
-          ORDER BY u.created_at DESC
-          LIMIT 10
-        `);
+        // Get recent users - Fix SQL Injection vulnerability by using parameterized queries
+        const recentUsers = await pool.query(
+          `SELECT u.id, u.username, u.email, u.created_at, r.name AS role
+           FROM users u
+           JOIN roles r ON u.role_id = r.id
+           ORDER BY u.created_at DESC
+           LIMIT $1`,
+          [10]
+        );
         
         // Get transfer statistics
         const transferStats = await pool.query(`

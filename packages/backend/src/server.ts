@@ -5,6 +5,7 @@ import session from 'express-session';
 import connectFlash from 'connect-flash';
 import helmet from 'helmet';
 import ejsLayouts from 'express-ejs-layouts';
+import cookieParser from 'cookie-parser';
 import cors from './config/cors';
 import environment from './config/environment';
 import adminConfig from './config/admin.config';
@@ -13,6 +14,8 @@ import adminRoutes from './admin/routes';
 import errorMiddleware from './api/middlewares/error.middleware';
 // Import the custom type definitions
 import './types/express-extensions';
+// Import the middleware type definitions
+import './types/express-middleware';
 
 // Create Express application
 const app = express();
@@ -37,6 +40,7 @@ app.use(helmet({
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 // Apply CORS to all API routes
 app.use('/api', cors); 
 
@@ -47,23 +51,24 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
 // Set up EJS as the view engine for admin panel
 app.set('views', adminConfig.views.dir);
 app.set('view engine', adminConfig.views.engine);
-app.use((ejsLayouts as unknown) as RequestHandler);
+// Fix for EJS layouts middleware
+app.use(ejsLayouts);
 app.set('layout', 'layouts/main');
 
 // Session configuration in server.ts
-app.use((session({
+app.use(session({
   secret: adminConfig.sessionSecret,
-  resave: true, // Changed from false to true to ensure sessions are saved
-  saveUninitialized: true, // Changed from false to true to ensure new sessions are saved
+  resave: true,
+  saveUninitialized: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
-    httpOnly: true, // Prevent client-side JS from reading the cookie
-    sameSite: 'lax', // Prevents CSRF attacks
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
     maxAge: adminConfig.cookie.maxAge,
   }
-}) as unknown) as RequestHandler);
+}));
 
-app.use((connectFlash() as unknown) as RequestHandler);
+app.use(connectFlash());
 
 // Make flash messages available to all views
 app.use((req: Request, res: Response, next: NextFunction) => {

@@ -53,10 +53,13 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
         return;
       }
     } catch (dbError) {
-      // If database connection fails, log error but allow access if already authenticated
+      // FIX: Don't allow admin access if we can't verify their role
       console.error('Database error during admin authentication:', dbError);
-      console.log('Continuing with admin access due to database connection issues');
-      // We'll still proceed if the session contains admin data
+      req.flash('error', 'System error: Unable to verify admin permissions. Please try again later.');
+      req.session.destroy(() => {
+        res.redirect('/admin/login');
+      });
+      return;
     }
     
     next();

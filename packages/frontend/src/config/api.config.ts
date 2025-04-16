@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: `${API_URL}/auth/forgot-password`,
     RESET_PASSWORD: `${API_URL}/auth/reset-password`,
     VERIFY_EMAIL: `${API_URL}/auth/verify-email`,
+    CSRF_TOKEN: `${API_URL}/auth/csrf-token`, // Added missing CSRF token endpoint
   },
   
   // User endpoints

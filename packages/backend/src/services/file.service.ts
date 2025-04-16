@@ -1,116 +1,174 @@
-// packages/backend/src/services/file.service.ts
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import multer, { FileFilterCallback } from 'multer';
 import sharp from 'sharp';
-import adminConfig from '../config/admin.config';
 import { Request } from 'express';
+import systemSettingsRepository from '../db/repositories/system-settings.repository';
 
-// Configure file storage
-const storage = multer.diskStorage({
-  destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
-    // Determine destination based on file type
-    let uploadPath = adminConfig.uploads.tempUploads;
-    
-    if (file.fieldname === 'gemstoneImages') {
-      uploadPath = adminConfig.uploads.gemstoneImages;
-    } else if (file.fieldname === 'profileImage') {
-      uploadPath = adminConfig.uploads.userAvatars;
-    }
-    
-    // Ensure directory exists
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-  }
-});
+// Default settings
+const DEFAULT_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const DEFAULT_MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
-// File filter function
-const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback): void => {
-  // Allow only image files
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    // This is the correct way to pass an error with FileFilterCallback
-    cb(null, false);
-    // You can also use req.fileValidationError to pass the error message
-    (req as any).fileValidationError = 'Only image files are allowed!';
-  }
-};
-
-// Create multer upload instance
-export const upload = multer({ 
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
-
+/**
+ * File service for handling file operations
+ */
 class FileService {
   /**
-   * Process and optimize gemstone images
+   * Process and optimize gemstone image
+   * @param sourcePath Source path of the uploaded file
+   * @param destinationPath Destination path to save the processed image
+   * @returns Path to the optimized image
    */
-  async processGemstoneImage(filePath: string): Promise<string> {
+  async processGemstoneImage(sourcePath: string, destinationPath: string): Promise<string> {
     try {
-      const optimizedPath = filePath.replace(path.extname(filePath), '_optimized.jpg');
+      // Get file extension
+      const ext = path.extname(destinationPath).toLowerCase();
+      const outputPath = destinationPath.replace(ext, '.jpg');
       
-      // Resize and optimize image
-      await sharp(filePath)
-        .resize(1200, 800, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 80 })
-        .toFile(optimizedPath);
+      // Process image based on type
+      await sharp(sourcePath)
+        .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 80, progressive: true })
+        .toFile(outputPath);
       
-      // Delete original file
-      fs.unlinkSync(filePath);
+      // Delete the original uploaded file
+      await this.deleteFile(sourcePath);
       
-      return path.basename(optimizedPath);
+      return outputPath;
     } catch (error) {
-      console.error('Image processing error:', error);
-      throw error;
+      console.error('Error processing image:', error);
+      throw new Error('Failed to process image');
     }
   }
-  
+
   /**
-   * Delete file
+   * Generate thumbnail for image
+   * @param sourcePath Source path of the image
+   * @param destinationPath Destination path to save the thumbnail
+   * @returns Filename of the generated thumbnail
    */
-  async deleteFile(filePath: string): Promise<void> {
+  async generateThumbnail(sourcePath: string, destinationPath: string): Promise<string> {
     try {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    } catch (error) {
-      console.error('File deletion error:', error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Generate thumbnail for gemstone image
-   */
-  async generateThumbnail(filePath: string): Promise<string> {
-    try {
-      const thumbnailPath = filePath.replace(path.extname(filePath), '_thumb.jpg');
+      // Get file extension
+      const ext = path.extname(destinationPath).toLowerCase();
+      const thumbnailPath = destinationPath.replace(ext, '.jpg');
       
-      // Create thumbnail
-      await sharp(filePath)
+      // Generate thumbnail
+      await sharp(sourcePath)
         .resize(300, 300, { fit: 'cover' })
         .jpeg({ quality: 70 })
         .toFile(thumbnailPath);
       
       return path.basename(thumbnailPath);
     } catch (error) {
-      console.error('Thumbnail generation error:', error);
-      throw error;
+      console.error('Error generating thumbnail:', error);
+      throw new Error('Failed to generate thumbnail');
+    }
+  }
+
+  /**
+   * Delete file
+   * @param filePath Path of the file to delete
+   */
+  async deleteFile(filePath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting file:', err);
+          reject(new Error('Failed to delete file'));
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * Get allowed file types from system settings
+   * @returns Array of allowed MIME types
+   */
+  async getAllowedFileTypes(): Promise<string[]> {
+    try {
+      const setting = await systemSettingsRepository.getSettingByKey('allowed_image_types');
+      if (setting && setting.value) {
+        return setting.value.split(',').map((type: string) => type.trim());
+      }
+      return DEFAULT_ALLOWED_TYPES;
+    } catch (error) {
+      console.error('Error getting allowed file types:', error);
+      return DEFAULT_ALLOWED_TYPES;
+    }
+  }
+
+  /**
+   * Get maximum file size from system settings
+   * @returns Maximum file size in bytes
+   */
+  async getMaxFileSize(): Promise<number> {
+    try {
+      const setting = await systemSettingsRepository.getSettingByKey('max_image_size_kb');
+      if (setting && setting.value) {
+        return parseInt(setting.value) * 1024; // Convert KB to bytes
+      }
+      return DEFAULT_MAX_SIZE;
+    } catch (error) {
+      console.error('Error getting max file size:', error);
+      return DEFAULT_MAX_SIZE;
+    }
+  }
+
+  /**
+   * Create temp directory if it doesn't exist
+   * @param directory Directory path
+   */
+  async ensureDirectoryExists(directory: string): Promise<void> {
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true });
+    }
+  }
+
+  /**
+   * Get file information
+   * @param filePath Path of the file
+   * @returns Object containing file information
+   */
+  async getFileInfo(filePath: string): Promise<{ size: number; type: string; dimensions?: { width: number; height: number } }> {
+    try {
+      const stats = fs.statSync(filePath);
+      
+      // Get file type using file extension
+      const ext = path.extname(filePath).toLowerCase();
+      let type = 'application/octet-stream'; // Default MIME type
+      
+      if (ext === '.jpg' || ext === '.jpeg') {
+        type = 'image/jpeg';
+      } else if (ext === '.png') {
+        type = 'image/png';
+      } else if (ext === '.webp') {
+        type = 'image/webp';
+      }
+      
+      // For images, get dimensions
+      if (type.startsWith('image/')) {
+        const metadata = await sharp(filePath).metadata();
+        return {
+          size: stats.size,
+          type,
+          dimensions: {
+            width: metadata.width || 0,
+            height: metadata.height || 0,
+          },
+        };
+      }
+      
+      return {
+        size: stats.size,
+        type,
+      };
+    } catch (error) {
+      console.error('Error getting file info:', error);
+      throw new Error('Failed to get file information');
     }
   }
 }

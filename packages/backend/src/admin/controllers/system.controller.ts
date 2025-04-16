@@ -5,6 +5,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import adminConfig from '../../config/admin.config';
+import { spawn } from 'child_process';
 
 class SystemController {
   /**
@@ -57,6 +58,11 @@ class SystemController {
         // Update settings
         for (const [key, value] of Object.entries(settings)) {
           if (key !== '_csrf') { // Skip CSRF token
+            // Validate key to prevent SQL injection
+            if (!/^[a-zA-Z0-9_.-]+$/.test(key)) {
+              throw new Error(`Invalid setting key: ${key}`);
+            }
+            
             await client.query(
               'UPDATE system_settings SET value = $1, updated_at = CURRENT_TIMESTAMP WHERE key = $2',
               [value, key]
@@ -65,6 +71,13 @@ class SystemController {
         }
         
         await client.query('COMMIT');
+        
+        // Log settings update to audit log
+        await pool.query(
+          `INSERT INTO audit_logs (user_id, action_type, table_name, record_id, old_data, new_data, ip_address) 
+           VALUES ($1, 'UPDATE', 'system_settings', NULL, NULL, $2, $3)`,
+          [req.admin!.userId, 'Updated system settings', req.ip]
+        );
         
         req.flash('success', 'System settings updated successfully');
         res.redirect('/admin/system/settings');
@@ -90,15 +103,35 @@ class SystemController {
       const limit = parseInt(req.query.limit as string) || adminConfig.pagination.defaultLimit;
       const offset = (page - 1) * limit;
       
-      // Optional filters
-      const actionFilter = req.query.action ? ` AND action_type = '${req.query.action}'` : '';
-      const tableFilter = req.query.table ? ` AND table_name = '${req.query.table}'` : '';
-      const dateFilter = req.query.date 
-        ? ` AND DATE(timestamp) = DATE('${req.query.date}')` 
-        : '';
-      const userFilter = req.query.user_id 
-        ? ` AND user_id = ${parseInt(req.query.user_id as string)}` 
-        : '';
+      // Fix SQL injection vulnerabilities in filters
+      const params: any[] = [limit, offset];
+      let paramCount = 3;
+      
+      // Optional filters with parameterized queries
+      let actionFilter = '';
+      let tableFilter = '';
+      let dateFilter = '';
+      let userFilter = '';
+      
+      if (req.query.action) {
+        actionFilter = ` AND action_type = $${paramCount++}`;
+        params.push(req.query.action);
+      }
+      
+      if (req.query.table) {
+        tableFilter = ` AND table_name = $${paramCount++}`;
+        params.push(req.query.table);
+      }
+      
+      if (req.query.date) {
+        dateFilter = ` AND DATE(timestamp) = DATE($${paramCount++})`;
+        params.push(req.query.date);
+      }
+      
+      if (req.query.user_id) {
+        userFilter = ` AND user_id = $${paramCount++}`;
+        params.push(parseInt(req.query.user_id as string));
+      }
       
       // Get audit logs with pagination
       const logsQuery = `
@@ -110,16 +143,19 @@ class SystemController {
         LIMIT $1 OFFSET $2
       `;
       
-      const logs = await pool.query(logsQuery, [limit, offset]);
+      const logs = await pool.query(logsQuery, params);
       
-      // Get total count for pagination
+      // Get total count for pagination with same filters
+      const countParams = params.slice(2); // Remove limit and offset
+      const countPlaceholders = countParams.map((_, i) => `$${i + 1}`).join(', ');
+      
       const countQuery = `
         SELECT COUNT(*) AS total
         FROM audit_logs
         WHERE 1=1 ${actionFilter} ${tableFilter} ${dateFilter} ${userFilter}
       `;
       
-      const countResult = await pool.query(countQuery);
+      const countResult = await pool.query(countQuery, countParams);
       const totalCount = parseInt(countResult.rows[0].total);
       const totalPages = Math.ceil(totalCount / limit);
       
@@ -208,6 +244,13 @@ class SystemController {
   async createBackup(req: Request, res: Response) {
     try {
       const { description } = req.body;
+      
+      // Validate description to prevent command injection
+      if (description && !/^[a-zA-Z0-9_\s-]+$/.test(description)) {
+        req.flash('error', 'Invalid backup description. Use only letters, numbers, spaces, underscores, and hyphens.');
+        return res.redirect('/admin/system/backup');
+      }
+      
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const backupFileName = `backup_${timestamp}${description ? '_' + description.replace(/\s+/g, '_') : ''}.sql`;
       const backupDir = path.join(__dirname, '../../../../database/backups');
@@ -218,13 +261,21 @@ class SystemController {
         fs.mkdirSync(backupDir, { recursive: true });
       }
       
-      // Build pg_dump command
-      const pgDumpCmd = `PGPASSWORD=${process.env.DB_PASSWORD} pg_dump -h ${process.env.DB_HOST} -p ${process.env.DB_PORT} -U ${process.env.DB_USER} -d ${process.env.DB_NAME} -F p -f "${backupPath}"`;
+      // Use spawn instead of exec to avoid command injection
+      const pgDump = spawn('pg_dump', [
+        '-h', process.env.DB_HOST || 'localhost',
+        '-p', process.env.DB_PORT || '5432',
+        '-U', process.env.DB_USER || 'postgres',
+        '-d', process.env.DB_NAME || 'gemstone',
+        '-F', 'p',
+        '-f', backupPath
+      ], {
+        env: { ...process.env, PGPASSWORD: process.env.DB_PASSWORD }
+      });
       
-      // Execute backup command
-      exec(pgDumpCmd, (error) => {
-        if (error) {
-          console.error('Backup creation error:', error);
+      pgDump.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`pg_dump process exited with code ${code}`);
           req.flash('error', 'Failed to create backup');
           return res.redirect('/admin/system/backup');
         }
@@ -239,6 +290,13 @@ class SystemController {
         req.flash('success', 'Backup created successfully');
         res.redirect('/admin/system/backup');
       });
+      
+      pgDump.on('error', (err) => {
+        console.error('Backup creation error:', err);
+        req.flash('error', 'Failed to create backup');
+        res.redirect('/admin/system/backup');
+      });
+      
     } catch (error) {
       console.error('Create backup error:', error);
       req.flash('error', 'Failed to create backup');
@@ -253,22 +311,36 @@ class SystemController {
     try {
       const { backup_file } = req.body;
       
+      // Validate backup file name to prevent path traversal
+      if (!backup_file || !/^[a-zA-Z0-9_.-]+\.sql$/.test(backup_file)) {
+        req.flash('error', 'Invalid backup file name');
+        return res.redirect('/admin/system/backup');
+      }
+      
       // Validate backup file
       const backupDir = path.join(__dirname, '../../../../database/backups');
       const backupPath = path.join(backupDir, backup_file);
       
-      if (!fs.existsSync(backupPath)) {
-        req.flash('error', 'Backup file not found');
+      // Ensure the file exists and is within the backups directory
+      if (!fs.existsSync(backupPath) || !backupPath.startsWith(backupDir)) {
+        req.flash('error', 'Backup file not found or invalid');
         return res.redirect('/admin/system/backup');
       }
       
-      // Build psql restore command
-      const restoreCmd = `PGPASSWORD=${process.env.DB_PASSWORD} psql -h ${process.env.DB_HOST} -p ${process.env.DB_PORT} -U ${process.env.DB_USER} -d ${process.env.DB_NAME} -f "${backupPath}"`;
+      // Use spawn instead of exec to avoid command injection
+      const psql = spawn('psql', [
+        '-h', process.env.DB_HOST || 'localhost',
+        '-p', process.env.DB_PORT || '5432',
+        '-U', process.env.DB_USER || 'postgres',
+        '-d', process.env.DB_NAME || 'gemstone',
+        '-f', backupPath
+      ], {
+        env: { ...process.env, PGPASSWORD: process.env.DB_PASSWORD }
+      });
       
-      // Execute restore command
-      exec(restoreCmd, (error) => {
-        if (error) {
-          console.error('Restore error:', error);
+      psql.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`psql restore process exited with code ${code}`);
           req.flash('error', 'Failed to restore from backup');
           return res.redirect('/admin/system/backup');
         }
@@ -283,6 +355,13 @@ class SystemController {
         req.flash('success', 'Database restored successfully');
         res.redirect('/admin/system/backup');
       });
+      
+      psql.on('error', (err) => {
+        console.error('Restore error:', err);
+        req.flash('error', 'Failed to restore from backup');
+        res.redirect('/admin/system/backup');
+      });
+      
     } catch (error) {
       console.error('Restore backup error:', error);
       req.flash('error', 'Failed to restore from backup');

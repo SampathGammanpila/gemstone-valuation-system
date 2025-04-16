@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import LoadingSpinner from '../components/common/ui/LoadingSpinner';
 
 // User Pages
 import Home from '../pages/user/Home';
@@ -32,7 +33,11 @@ const ProtectedRoute: React.FC<{ element: React.ReactNode; roles?: string[] }> =
   const { isAuthenticated, user, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner size="large" text="Loading your account..." />
+      </div>
+    );
   }
   
   if (!isAuthenticated) {
@@ -47,10 +52,14 @@ const ProtectedRoute: React.FC<{ element: React.ReactNode; roles?: string[] }> =
 };
 
 const AppRoutes: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   // Determine which profile component to show based on user role
   const getProfileComponent = () => {
+    if (isLoading) {
+      return <LoadingSpinner size="large" text="Loading profile..." />;
+    }
+    
     if (!user) return <Navigate to="/login" replace />;
     
     switch (user.role) {
@@ -76,11 +85,20 @@ const AppRoutes: React.FC = () => {
       <Route path="/cutters/:id" element={<CutterDetail />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Protected user routes - require authentication */}
+      {/* Protected user routes with proper role restrictions */}
       <Route path="/profile" element={<ProtectedRoute element={getProfileComponent()} />} />
       <Route path="/profile/settings" element={<ProtectedRoute element={<ProfileSettings />} />} />
-      <Route path="/profile/collection" element={<ProtectedRoute element={<MyCollection />} />} />
-      <Route path="/valuation" element={<ProtectedRoute element={<ValuationWizard />} />} />
+      <Route path="/profile/collection" element={<ProtectedRoute element={<MyCollection />} roles={['collector', 'dealer']} />} />
+      <Route path="/valuation" element={<ProtectedRoute element={<ValuationWizard />} roles={['appraiser', 'dealer']} />} />
+      
+      {/* Cutter specific routes */}
+      <Route path="/cutter-workspace" element={<ProtectedRoute element={<div>Cutter Workspace</div>} roles={['cutter']} />} />
+      
+      {/* Dealer specific routes */}
+      <Route path="/marketplace/manage" element={<ProtectedRoute element={<div>Manage Listings</div>} roles={['dealer']} />} />
+      
+      {/* Appraiser specific routes */}
+      <Route path="/appraisals" element={<ProtectedRoute element={<div>Manage Appraisals</div>} roles={['appraiser']} />} />
 
       {/* 404 redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
